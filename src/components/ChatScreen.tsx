@@ -29,23 +29,28 @@ import { IoVideocamOutline } from "react-icons/io5";
 import { GrAttachment } from "react-icons/gr";
 import { BsFileArrowDown } from "react-icons/bs";
 import { IoArrowBack } from "react-icons/io5";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../redux/store";
+import { addMessages, incrementPage, sendMessage } from "../redux/chatSlice";
 import axios from "axios";
 import { Message } from "../types/Message";
 import ChatMessage from "./ChatMessage";
 
 const ChatScreen: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [page, setPage] = useState(0);
+  const dispatch = useDispatch();
+  const messages = useSelector((state: RootState) => state.chat.messages);
+  const page = useSelector((state: RootState) => state.chat.page);
   const [groupName, setGroupName] = useState("Trip 1");
+  const [newMessage, setNewMessage] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
-  const initialLoad = useRef(true);
+  const initialLoad = useRef(true); // flag to check initial load
 
   const fetchMessages = async (page: number) => {
     try {
       const response = await axios.get(
         `https://qa.corider.in/assignment/chat?page=${page}`
       );
-      setMessages((prevMessages) => [...response.data.chats, ...prevMessages]);
+      dispatch(addMessages(response.data.chats));
     } catch (error) {
       console.error("Error fetching messages:", error);
     }
@@ -53,22 +58,23 @@ const ChatScreen: React.FC = () => {
 
   useEffect(() => {
     fetchMessages(page);
-  }, [page]);
+  }, [page, dispatch]);
 
   useEffect(() => {
+    // Scroll to the bottom on initial load
     if (initialLoad.current && containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
-      initialLoad.current = false;
+      initialLoad.current = false; // reset the flag after initial load
     }
   }, [messages]);
 
   const handleScroll = useCallback(() => {
     if (containerRef.current) {
       if (containerRef.current.scrollTop < 100) {
-        setPage((prevPage) => prevPage + 1);
+        dispatch(incrementPage());
       }
     }
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -77,6 +83,28 @@ const ChatScreen: React.FC = () => {
       return () => container.removeEventListener("scroll", handleScroll);
     }
   }, [handleScroll]);
+
+  const handleSendMessage = () => {
+    if (newMessage.trim()) {
+      const message: Message = {
+        id: new Date().toISOString(),
+        message: newMessage,
+        sender: {
+          image: "https://via.placeholder.com/150",
+          is_kyc_verified: true,
+          self: true,
+          user_id: "1",
+        },
+        time: new Date().toISOString(),
+      };
+      dispatch(sendMessage(message));
+      setNewMessage("");
+      // Scroll to the bottom after sending a message
+      if (containerRef.current) {
+        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      }
+    }
+  };
 
   const renderMessages = () => {
     let lastDate = "";
@@ -102,7 +130,7 @@ const ChatScreen: React.FC = () => {
             </HStack>
           )}
           <Box
-            maxWidth="300px"
+            maxWidth="600px"
             alignSelf={msg.sender.self ? "flex-end" : "flex-start"}
           >
             <ChatMessage message={msg} />
@@ -207,7 +235,12 @@ const ChatScreen: React.FC = () => {
       <Box position="sticky" bottom="0" zIndex="1000" bg="pink.50" width="100%">
         <Divider />
         <InputGroup p={4} marginBottom={4}>
-          <Input placeholder="Reply to @Rohit Yadav" bg={"white"} />
+          <Input
+            placeholder="Reply to @Rohit Yadav"
+            bg={"white"}
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+          />
           <InputRightElement width="auto">
             <Flex align="center" mt={8}>
               <Menu>
@@ -250,6 +283,7 @@ const ChatScreen: React.FC = () => {
                 p={0}
                 variant="ghost"
                 mr={5}
+                onClick={handleSendMessage}
               />
             </Flex>
           </InputRightElement>

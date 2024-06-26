@@ -1,16 +1,19 @@
-import React from "react";
-import { ChakraProvider, Box } from "@chakra-ui/react";
-import ChatScreen from "./components/ChatScreen";
+import React, { Suspense, lazy } from "react";
+import { ChakraProvider } from "@chakra-ui/react";
+import { Provider } from "react-redux";
+import store from "./redux/store";
+
+const ChatScreen = lazy(() => import("./components/ChatScreen"));
 
 const App: React.FC = () => {
   return (
-    <ChakraProvider>
-      <Box height="100vh" display="flex" flexDirection="column">
-        <Box flex="1" overflowY="auto">
+    <Provider store={store}>
+      <ChakraProvider>
+        <Suspense fallback={<div>Loading...</div>}>
           <ChatScreen />
-        </Box>
-      </Box>
-    </ChakraProvider>
+        </Suspense>
+      </ChakraProvider>
+    </Provider>
   );
 };
 
