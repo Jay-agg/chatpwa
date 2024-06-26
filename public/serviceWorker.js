@@ -1,37 +1,27 @@
-const CACHE_NAME = "version-1";
-const urlsToCache = ["index.html", "offline.html"];
-
-this.addEventListener("install", (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("opened cache");
-      return cache.addAll(urlsToCache);
+    caches.open("chat-app-cache").then((cache) => {
+      return cache.addAll([
+        "/",
+        "/index.html",
+        "/static/js/bundle.js",
+        "/static/js/main.chunk.js",
+        "/static/js/1.chunk.js",
+        "/static/js/vendors~main.chunk.js",
+        "/static/js/vendors~main.chunk.js.map",
+        "/manifest.json",
+        "/favicon.ico",
+        "/logo192.png",
+        "/logo512.png",
+      ]);
     })
   );
 });
 
-this.addEventListener("fetch", (event) => {
+self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((res) => {
-      return fetch(event.request).catch(() => {
-        caches.match("offline.html");
-      });
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
     })
-  );
-});
-
-this.addEventListener("activate", (event) => {
-  const cacheWhiteList = [];
-  cacheWhiteList.push(CACHE_NAME);
-  event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(
-        cacheNames.map((cacheName) => {
-          if (!cacheWhiteList.includes(cacheName)) {
-            return caches.delete(cacheName);
-          }
-        })
-      )
-    )
   );
 });
