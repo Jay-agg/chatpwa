@@ -8,16 +8,22 @@ interface ChatMessageProps {
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   return (
-    <HStack align="start" spacing={4} width="100%">
-      <Avatar src={message.sender.image} />
+    <HStack align="start" spacing={2} width="100%">
+      {message.sender.self ? "" : <Avatar src={message.sender.image} />}
       <Box
-        bg={message.sender.self ? "blue.100" : "gray.100"}
+        bg={message.sender.self ? "blue.600" : "white"}
+        boxShadow={"md"}
         p={4}
-        borderRadius="md"
+        borderRadius="lg"
         flex="1"
       >
-        <Text>{message.message}</Text>
-        <Text fontSize="xs" color="gray.500">
+        <Text
+          color={message.sender.self ? "white" : "grey.600"}
+          fontWeight={"normal"}
+        >
+          {message.message}
+        </Text>
+        <Text fontSize="xs" color="grey.300">
           {new Date(message.time).toLocaleString()}
         </Text>
       </Box>
