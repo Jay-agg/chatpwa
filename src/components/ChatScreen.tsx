@@ -1,4 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { ReactComponent as SendIcon } from "../assets/icons/send.svg";
+import { ReactComponent as EditIcon } from "../assets/icons/edit.svg";
+import { ReactComponent as ProfileIcon } from "../assets/icons/Profile.svg";
+import { ReactComponent as MenuIcon } from "../assets/icons/menu.svg";
+import { ReactComponent as BackIcon } from "../assets/icons/back.svg";
+import { ReactComponent as DocumentIcon } from "../assets/icons/document.svg";
+import { ReactComponent as VideoIcon } from "../assets/icons/video.svg";
+import { ReactComponent as CameraIcon } from "../assets/icons/camera.svg";
+import { ReactComponent as AttachmentIcon } from "../assets/icons/paperclip.svg";
+
 import {
   Box,
   VStack,
@@ -22,13 +32,9 @@ import {
   EditablePreview,
   ButtonGroup,
 } from "@chakra-ui/react";
-import { BiDotsVerticalRounded, BiSend, BiEditAlt } from "react-icons/bi";
-import { FiCamera, FiFile, FiPhoneCall, FiUsers } from "react-icons/fi";
-import { MdOutlineCameraAlt } from "react-icons/md";
-import { IoVideocamOutline } from "react-icons/io5";
-import { GrAttachment } from "react-icons/gr";
-import { BsFileArrowDown } from "react-icons/bs";
-import { IoArrowBack } from "react-icons/io5";
+
+import { FiFile, FiPhoneCall, FiUsers } from "react-icons/fi";
+
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { addMessages, incrementPage, sendMessage } from "../redux/chatSlice";
@@ -130,7 +136,7 @@ const ChatScreen: React.FC = () => {
             </HStack>
           )}
           <Box
-            maxWidth="600px"
+            maxWidth={msg.sender.self ? "85%" : "90%"}
             alignSelf={msg.sender.self ? "flex-end" : "flex-start"}
           >
             <ChatMessage message={msg} />
@@ -141,19 +147,24 @@ const ChatScreen: React.FC = () => {
   };
 
   return (
-    <Box height="100vh" bg="pink.50" display="flex" flexDirection="column">
+    <Box
+      height="100vh"
+      bg="rgba(250, 249, 244, 1)"
+      display="flex"
+      flexDirection="column"
+    >
       <Box
         position="sticky"
         top="0"
         zIndex="1000"
-        bg="pink.50"
+        bg="rgba(250, 249, 244, 1)"
         borderBottom="1px solid"
         borderColor="gray.200"
         width="100%"
       >
         <HStack>
           <IconButton
-            icon={<IoArrowBack />}
+            icon={<BackIcon />}
             aria-label="Edit Group"
             variant="black"
             ml={5}
@@ -171,14 +182,22 @@ const ChatScreen: React.FC = () => {
             <EditablePreview />
             <EditableInput />
           </Editable>
+          <HStack flex={1}>
+            <IconButton
+              aria-label="Edit Group"
+              icon={<EditIcon />}
+              ml={"auto"}
+              mr={"5"}
+              variant={"ghost"}
+              mt={5}
+            />
+          </HStack>
         </HStack>
 
         <HStack p={4} justify="space-between">
           <HStack>
             <AvatarGroup size="md" max={2}>
-              <Avatar src="https://via.placeholder.com/150" />
-              <Avatar src="https://via.placeholder.com/150" />
-              <Avatar src="https://via.placeholder.com/150" />
+              <Avatar icon={<ProfileIcon />} />
             </AvatarGroup>
 
             <Box flex="1">
@@ -201,17 +220,8 @@ const ChatScreen: React.FC = () => {
             </Box>
           </HStack>
           <HStack>
-            <IconButton
-              icon={<BiEditAlt />}
-              aria-label="Edit Group"
-              variant="black"
-            />
             <Menu>
-              <MenuButton
-                as={IconButton}
-                icon={<BiDotsVerticalRounded />}
-                variant="black"
-              />
+              <MenuButton as={IconButton} icon={<MenuIcon />} variant="black" />
               <MenuList>
                 <MenuItem icon={<FiUsers />}>Members</MenuItem>
                 <MenuItem icon={<FiPhoneCall />}>Share Number</MenuItem>
@@ -232,7 +242,13 @@ const ChatScreen: React.FC = () => {
           {renderMessages()}
         </VStack>
       </Box>
-      <Box position="sticky" bottom="0" zIndex="1000" bg="pink.50" width="100%">
+      <Box
+        position="sticky"
+        bottom="0"
+        zIndex="1000"
+        bg="rgba(250, 249, 244, 1)"
+        width="100%"
+      >
         <Divider />
         <InputGroup p={4} marginBottom={4}>
           <Input
@@ -246,7 +262,7 @@ const ChatScreen: React.FC = () => {
               <Menu>
                 <MenuButton
                   as={IconButton}
-                  icon={<GrAttachment />}
+                  icon={<AttachmentIcon />}
                   variant="black"
                   mr={2}
                 />
@@ -260,17 +276,17 @@ const ChatScreen: React.FC = () => {
                     <Button
                       colorScheme="white"
                       variant="white"
-                      leftIcon={<MdOutlineCameraAlt />}
+                      leftIcon={<CameraIcon />}
                       p={4}
                       borderRadius={50}
                     ></Button>
                     <Button
-                      leftIcon={<IoVideocamOutline />}
+                      leftIcon={<VideoIcon />}
                       colorScheme="white"
                       variant="white"
                     ></Button>
                     <Button
-                      leftIcon={<BsFileArrowDown />}
+                      leftIcon={<DocumentIcon />}
                       colorScheme="white"
                       variant="white"
                     ></Button>
@@ -278,7 +294,8 @@ const ChatScreen: React.FC = () => {
                 </MenuList>
               </Menu>
               <Button
-                rightIcon={<BiSend />}
+                aria-label="Send"
+                leftIcon={<SendIcon />}
                 colorScheme="black"
                 p={0}
                 variant="ghost"
