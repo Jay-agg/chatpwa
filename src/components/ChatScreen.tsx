@@ -50,6 +50,7 @@ const ChatScreen: React.FC = () => {
   const [newMessage, setNewMessage] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const initialLoad = useRef(true); // flag to check initial load
+  const observer = useRef<IntersectionObserver | null>(null);
 
   const fetchMessages = async (page: number) => {
     try {
@@ -74,21 +75,18 @@ const ChatScreen: React.FC = () => {
     }
   }, [messages]);
 
-  const handleScroll = useCallback(() => {
-    if (containerRef.current) {
-      if (containerRef.current.scrollTop < 100) {
-        dispatch(incrementPage());
-      }
-    }
-  }, [dispatch]);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-      return () => container.removeEventListener("scroll", handleScroll);
-    }
-  }, [handleScroll]);
+  const lastMessageRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && messages.length > 0) {
+          dispatch(incrementPage());
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [messages, dispatch]
+  );
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
@@ -141,6 +139,7 @@ const ChatScreen: React.FC = () => {
           >
             <ChatMessage message={msg} />
           </Box>
+          {index === 0 && <div ref={lastMessageRef} />}
         </React.Fragment>
       );
     });
